@@ -53,7 +53,7 @@ class Matrix:
                     continue
                 for j in range(2):
                     tmp.mat[i][j] += self.mat[i][k] * m.mat[k][j]
-                    tmp.mat[i][j] %= 10000;
+                    tmp.mat[i][j] %= 10000
         return tmp
         
 class Solution:

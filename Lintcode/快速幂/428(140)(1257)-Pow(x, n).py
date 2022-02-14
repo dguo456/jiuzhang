@@ -44,6 +44,7 @@ class Solution:
         result = 1
         tmp = a
 
+        # 3 ^ 5 % 7 = 5   =>   3*(3*3)*(3*3) % 7    =>    (3%7 * (3*3)%7 * (3*3)%7) % 7
         while n != 0:
             if n % 2 == 1:
                 result = (result * tmp) % b
