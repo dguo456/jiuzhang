@@ -67,3 +67,44 @@ class Solution:
                 profit += prices[i] - prices[i - 1]
 
         return profit
+
+
+
+
+# 151 · Best Time to Buy and Sell Stock III
+"""
+Say you have an array for which the ith element is the price of a given stock on day i.
+Design an algorithm to find the maximum profit. You may complete at most two transactions.
+
+Input : [4,4,6,1,1,4,2,5]
+Output : 6
+"""
+
+# Method.1  隔板法，同 Subarray系列 第42题的解法
+class Solution:
+    """
+    @param prices: Given an integer array
+    @return: Maximum profit
+    """
+    def maxProfit(self, prices):
+        n = len(prices)
+        if n <= 1:
+            return 0
+            
+        p1 = [0] * n
+        p2 = [0] * n
+        
+        minV = prices[0]
+        for i in range(1, n):
+            minV = min(minV, prices[i]) 
+            p1[i] = max(p1[i - 1], prices[i] - minV)
+        
+        maxV = prices[-1]
+        for i in range(n-2, -1, -1):
+            maxV = max(maxV, prices[i])
+            p2[i] = max(p2[i + 1], maxV - prices[i])
+        
+        res = 0
+        for i in range(n):
+            res = max(res, p1[i] + p2[i])
+        return res
