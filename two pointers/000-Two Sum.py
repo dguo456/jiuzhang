@@ -523,3 +523,92 @@ class Solution:
                         right -= 1
 
         return results
+
+
+
+
+
+# 689 · Two Sum IV - Input is a BST
+"""
+Given a binary search tree and a number n, find two numbers in the tree that sums up to n.
+输入:   {4,2,5,1,3}     5
+输出:   [2,3] (or [3,2] or [1,4] or [4,1])
+"""
+
+# Definition of TreeNode:
+class TreeNode:
+    def __init__(self, val):
+        self.val = val
+        self.left, self.right = None, None
+
+
+class Solution:
+    """
+    @param: : the root of tree
+    @param: : the target sum
+    @return: two numbers from tree which sum is n
+    """
+    def twoSum(self, root, n):
+        if root is None:
+            return None
+
+        node_set = set()
+        self.results = None
+        self.dfs(root, n, node_set)
+        return self.results
+
+    def dfs(self, root, n, node_set):
+        if root is None:
+            return
+
+        self.dfs(root.left, n, node_set)
+
+        if n - root.val in node_set:
+            self.results = [n - root.val, root.val]
+        else:
+            node_set.add(root.val)
+
+        self.dfs(root.right, n, node_set)
+
+
+
+
+
+# 1879 · Two Sum VII
+"""
+Given an array of integers that is already sorted in ascending absolute order, find two numbers so that 
+the sum of them equals a specific number. The function twoSum should return indices of the two numbers 
+such that they add up to the target, index1 < index2. Note: the subscript of the array starts with 0
+You are not allowed to sort this array.
+
+Input: 
+[0,-1,2,-3,4]   1
+Output: 
+[[1,2],[3,4]]
+Explanation: 
+nums[1] + nums[2] = -1 + 2 = 1, nums[3] + nums[4] = -3 + 4 = 1
+You can return [[3,4],[1,2]], the system will automatically help you sort it to [[1,2],[3,4]]. 
+But [[2,1],[3,4]] is invaild.
+"""
+
+class Solution:
+    """
+    @param nums: the input array
+    @param target: the target number
+    @return: return the target pair
+    """
+    # Method.1      HashTable   O(n)    O(n)
+    def two_sum_v_i_i(self, nums, target):
+        counter = {}
+        results = []
+
+        for i in range(len(nums)):
+            if target - nums[i] in counter:
+                results.append([min(i, counter[target-nums[i]]), max(i, counter[target-nums[i]])])
+            counter[nums[i]] = i
+
+        return results
+
+
+    # Method.2      two pointers    O(n)    O(1)
+    

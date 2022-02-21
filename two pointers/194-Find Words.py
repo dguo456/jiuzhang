@@ -88,19 +88,20 @@ class Solution:
         
         return result
 
-    def is_subsequence(self, s, t, positions):
+    def is_subsequence(self, s, word, positions):
         i, j = 0, 0
-        while i < len(s) and j < len(t):
-            i = self.find_next_position(t[j], i, positions)
+        while i < len(s) and j < len(word):
+            i = self.find_next_position(word[j], i, positions)
             if i == -1:
                 break
             j += 1
 
-        return j == len(t)
+        return j == len(word)
 
     def find_next_position(self, char, index, positions):
         if not positions[char]:
             return -1
+
         left, right = 0, len(positions[char]) - 1
         while left + 1 < right:
             mid = (left + right) // 2
