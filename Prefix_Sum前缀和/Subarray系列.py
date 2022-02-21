@@ -1,5 +1,5 @@
 # subarray系列包含 - 双指针、前缀和、动态规划、以及隔板法等算法的综合
-# 138、404、139、838、1844、911、994、405、406、191、1075、41、42、43、44、45、620
+# 138、404、139、838、1844、911、994、405、406、191、1075、41、42、43、44、45、620，621
 
 # 如果一道题你可以用暴力解决出来，而且题目恰好有连续的限制， 那么滑动窗口和前缀和等技巧就应该被想到。
 # 关键是，如何快速得到某个子数组的和呢，比如说给你一个数组 nums，让你实现一个接口 sum(i, j)，这个接口要返回 nums[i..j] 的和，
@@ -793,3 +793,117 @@ class Solution:
 
 
 
+# 621 · Maximum Subarray V
+"""
+Given an integer arrays, find a contiguous subarray which has the largest sum and length 
+should be between k1 and k2 (include k1 and k2).
+Return the largest sum, return 0 if there are fewer than k1 elements in the array.
+
+Input:  [-2,2,-3,4,-1,2,1,-5,3]     2   4
+Output: 6
+Explanatipn:
+ the contiguous subarray `[4,-1,2,1]` has the largest sum = `6`.
+"""
+from collections import deque
+
+# 滑动窗口系列题，deque维护子数组，每一次窗口滑动则：前缀和 - 队头，最后得出最大值。
+class Solution:
+    """
+    @param nums: an array of integers
+    @param k1: An integer
+    @param k2: An integer
+    @return: the largest sum
+    """
+    def maxSubarray5(self, nums, k1, k2):
+        n = len(nums)
+        if n < k1:
+            return 0
+
+        result = -sys.maxsize
+        queue = deque()
+        prefix_sum = [0 for _ in range(n + 1)]
+
+        for i in range(1, n + 1):
+            prefix_sum[i] = prefix_sum[i - 1] + nums[i - 1]
+            if len(queue) and queue[0] < i - k2:
+                queue.popleft()
+
+            # 求maxsubarry只需要現在的prefix減去最小值，因此可以用一個while loop, 把所有比要加上去的數值
+            # (prefix[i-k1])小的數都pop掉，最後如果deque裡有值, 就比較目前的最大值及prefix[i] - deque[0]得到答案
+            if i >= k1:
+                while len(queue) and prefix_sum[queue[-1]] > prefix_sum[i - k1]:
+                    queue.pop()     # 这里注意不是popleft
+                queue.append(i - k1)
+
+            # [i - k2, i - k1]
+            if len(queue) and prefix_sum[i] - prefix_sum[queue[0]] > result:
+                result = prefix_sum[i] - prefix_sum[queue[0]]
+    
+        return result
+
+
+
+
+# 722 · Maximum Subarray VI     (Skipped)
+"""
+Given an array of integers. find the maximum XOR subarray value in given array.
+
+Input: [8, 1, 2, 12, 7, 6]
+Output: 15
+Explanation:
+The subarray [1, 2, 12] has maximum XOR value
+"""
+
+
+
+
+
+# 1850 · Pick Apples
+"""
+There are N apple trees in the orchard. Alice is planning to collect all the apples from K 
+consecutive trees and Bob is planning to collect all the apples from L consecutive trees.
+They want to choose to disjoint segements so not to disturb each other. you should return 
+the maximum number of apples that they can collect.
+
+input:  A = [6, 1, 4, 6, 3, 2, 7, 4]    K = 3   L = 2
+Output:     24
+Explanation: 
+beacuse Alice can choose tree 3 to 5 and collect 4 + 6 + 3 = 13 apples, and Bob can choose 
+trees 7 to 8 and collect 7 + 4 = 11 apples.Thus, they will collect 13 + 11 = 24.
+"""
+from typing import (
+    List,
+)
+
+# 区间和首先想到前缀和快速求解, 因为互相不干涉，所以考虑隔板，分割成左右两部分
+# 因为L和K的区间连续，所以右移枚举每一个分割点，分成 [i-L:i]和[i:i+L] 两部分。
+# max(max(左窗口sum) + 当前右窗口sum) 即为结果
+# K和L的长度不同，可以分成的左右两个部分的区间也会不同, 所以需要考虑左边K，右边L和左边L，右边K。
+# 所以基本同样的code，copy过来K和L对掉。
+# 时间：O(n)
+# 空间：O(n)
+class Solution:
+    """
+    @param a: a list of integer
+    @param k: a integer
+    @param l: a integer
+    @return: return the maximum number of apples that they can collect.
+    """
+    def pick_apples(self, A: List[int], K: int, L: int) -> int:
+        prefix_sum = [0]
+        for n in A:
+            prefix_sum.append(prefix_sum[-1] + n)
+
+        result = -1
+
+        max_left = 0
+        for i in range(K, len(prefix_sum) - L):
+            max_left = max(prefix_sum[i] - prefix_sum[i-K], max_left)
+            result = max(max_left + prefix_sum[i+L] - prefix_sum[i], result)
+
+        max_left = 0
+        for i in range(L, len(prefix_sum) - K):
+            max_left = max(prefix_sum[i] - prefix_sum[i-L], max_left)
+            result = max(max_left + prefix_sum[i+K] - prefix_sum[i], result)
+
+        return result

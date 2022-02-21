@@ -160,6 +160,8 @@ Explanation: Buy at 4 and sell at 6. Then buy at 1 and sell at 5. Your profit is
 # 如果我们在遍历dp数组中实时更新一个变量maxDiff，就能节省这部分的时间开销。maxDiff表示：最多交易i-1次时，
 # 从第0天到第j-1天最大利润-当天价格的最大值。
 
+# 时间复杂度: O(n * k)。遍历dp的每个元素。
+# 空间复杂度: O(n * k)。考虑dp数组占用的空间。
 # 当k >= n / 2时，可退化为无限次交易的问题，我们单独处理这种corner case。
 # 空间复杂度也可以继续优化，因为我们在考虑最多进行i次交易时，只用到了dp[i-1]的数据，所以可以只需要保存两行。空间复杂度可以优化成O(n)。
 
@@ -190,3 +192,50 @@ class Solution:
                 dp[i][j] = max(dp[i][j - 1], prices[j] + max_diff)
                 
         return dp[K][n - 1]
+
+
+
+
+# 1691 · Best Time to Buy and Sell Stock V
+"""
+Given a stock n-day price, you can only trade at most once a day, you can choose to buy a stock or 
+sell a stock or give up the trade today, output the maximum profit can be achieved.
+
+Given `a = [1,2,10,9]`, return `16`
+Input:  [1,2,10,9]
+Output: 16
+Explanation:
+you can buy in day 1,2 and sell in 3,4.     profit:-1-2+10+9 = 16 
+"""
+
+# 算法： 优先队列
+# 从前往后遍历每天的股票价格，我们考虑每天能够获取的最大收益，考虑贪心获得最大收益，那么我们可以从左往右遍历，
+# 若当前价格大于之前遇到的最低价，则做交易。同时把在heap里用卖出价代替买入价，即将当前价格压入队列（假设当前价格为b,
+# 要被弹出的元素是a,后面有一个c元素，如果那时a还在，作为最低价，差值为c-a，而这里已经被b拿去做了差值，所以b得压入队列，
+# 因为c-b+b-a = c-a），弹出之前的最低价,可以利用优先队列来使之前的价格有序.
+# 用优先队列存储当前遇到过的价格, 每日的新价格 与历史最低价比较, 若比最低价高，则弹出最低价，同时更新答案，即加上差值,压入当前价格
+# 复杂度分析
+# 时间复杂度O(nlogn)    n为天数,优先队列的复杂度
+# 空间复杂度O(n)        n为天数
+import heapq
+
+class Solution:
+    """
+    @param a: the array a
+    @return: return the maximum profit
+    """
+    def getAns(self, a):
+        minheap = []
+        result = 0
+
+        for k in a:
+            # 如果k比之前遇到过的最低价高
+            if minheap and k > minheap[0]:
+                # 收益就是当前k - 遇到过的最低价
+                result += k - heapq.heappop(minheap)
+                heapq.heappush(minheap, k)
+
+            # 同时将当前值压入队列
+            heapq.heappush(minheap,k)
+
+        return result
