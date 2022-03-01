@@ -39,8 +39,9 @@ class Solution:
 
         while queue:
             path += 1
+            len_q = len(queue)
 
-            for _ in range(len(queue)):
+            for _ in range(len_q):
                 node = queue.popleft()
                 visited.add(node)
 
