@@ -4,9 +4,9 @@ Given a triangle, find the minimum path sum from top to bottom. Each step you ma
 adjacent numbers on the row below.
 triangle = [
      [2],
-    [3,4],
-   [6,5,7],
-  [4,1,8,3]
+     [3,4],
+     [6,5,7],
+     [4,1,8,3]
 ]
 Output: 11
 """
