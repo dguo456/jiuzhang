@@ -3,6 +3,7 @@
 # 51 · Previous Permutation
 # 52 · Next Permutation
 # 197 · Permutation Index
+# 198 · Permutation Index II
 # 388 · Permutation Sequence
 # 211 · String Permutation
 # 10 · String Permutation II
@@ -47,7 +48,6 @@ class Solution:
 
     # Method.2      BFS
     def permute(self, nums):
-        
         if not nums:
             return [[]]
             
@@ -80,7 +80,6 @@ class Solution:
     """
 
     def permuteUnique(self, nums):
-        
         nums = sorted(nums)
         visited = {i: False for i in range(len(nums))}
         permutations = []
@@ -336,23 +335,81 @@ class Solution:
     """
     # 正序利用权值计算index，按照正常思维，从正向思维计算要比反向思维好想一些
     def permutationIndex(self, A):
-        # 至少为1，初始的全排列为增序，index记录第几个全排列
+        if A is None or len(A) == 0:
+            return 0
+
         index = 1
         for i in range(len(A)):
-            # count记录该数后面有几个比它小的数字
-            count = 0
-            # factor用来计算阶乘的权值
-            factorial = 1
+            count, factorial = 0, 1
             for j in range(i + 1, len(A)):
                 if A[j] < A[i]:
                     count += 1
-            # if count > 0:
-            #     for k in range(1, len(A) - i):
-            #         factorial *= k
                 factorial *= j - i
             index += factorial * count
 
         return index
+
+
+    # Method.2      逆序
+    def permutation_index(self, a) -> int:
+        if a is None or len(a) == 0:
+            return 0
+
+        index = factorial = 1
+        for i in range(len(a)-1, -1, -1):
+            count = 0
+            for j in range(i + 1, len(a)):
+                if a[j] < a[i]:
+                    count += 1
+                
+            index += factorial * count
+            factorial *= len(a) - i
+
+        return index
+
+
+
+
+
+
+
+# 198 · Permutation Index II
+"""
+Given a permutation which may contain repeated numbers, find its index in all the permutations 
+of these numbers, which are ordered in lexicographical order. The index begins at 1.
+
+Input :[1,4,2,2]
+Output:3
+
+Input :[1,6,5,3,1]
+Output:24
+"""
+class Solution:
+    # 这道题和Permutation IndexI思想一样，计算每一位上数字是该位上第几个排列，再将每一位结果加和即可。
+    # 只是这道题有重复元素，有无重复元素最大的区别在于原来的1!, 2!, 3!...等需要除以重复元素个数的阶乘。
+    # 按照数字从低位到高位进行计算。每遇到一个重复的数字就更新重复元素个数的阶乘的值。
+    # 从后往前遍历数组，用一个hashmap来记录重复元素个数。若新来的数不是重复元素，则加入hashmap
+    def permutation_index_i_i(self, a) -> int:
+        if not a or len(a) == 0:
+            return 0
+
+        index = factorial = multi_fact = 1
+        counter = {}
+        
+        for i in range(len(a) - 1, -1, -1):
+            counter[a[i]] = counter.get(a[i], 0) + 1
+            multi_fact *= counter[a[i]]
+            
+            count = 0
+            for j in range(i + 1, len(a)):
+                if a[j] < a[i]:
+                    count += 1
+
+            index += count * factorial // multi_fact
+            factorial *= len(a) - i
+
+        return index
+
 
 
 
