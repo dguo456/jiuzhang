@@ -612,15 +612,8 @@ Derive the order of letters in this language.
 Input: ["wrt","wrf","er","ett","rftt"]
 Output: "wertf"
 """
-from heapq import *
 class Solution:
-    """
-    @param words: a list of words
-    @return: a string which is correct order
-    """
-    def alienOrder(self, words):
-        
-        # Construct Graph
+    def alienOrder(self, words: List[str]) -> str:
         Graph = {ch: [] for word in words for ch in word}
         indegree = {ch: 0 for word in words for ch in word}
         
@@ -631,23 +624,22 @@ class Solution:
                     Graph[prev].append(curr)
                     indegree[curr] += 1
                     break
-        if prev == curr and len(words[pos]) > len(words[pos+1]):
-            return ""
+            if prev == curr and len(words[pos]) > len(words[pos+1]):
+                return ""
                 
-        # Topological sort
-        heap = [ch for ch in indegree if indegree[ch] == 0]
-        heapify(heap)
+        starting_node = [ch for ch in indegree if indegree[ch] == 0]
+        queue = deque(starting_node)
         order = []
-        while heap:
-            for _ in range(len(heap)):
-                ch = heappop(heap)
+        
+        while queue:
+            for _ in range(len(queue)):
+                ch = queue.popleft()
                 order.append(ch)
                 for neighbor in Graph[ch]:
                     indegree[neighbor] -= 1
                     if indegree[neighbor] == 0:
-                        heappush(heap, neighbor)
+                        queue.append(neighbor)
                         
-        # Order is invalid
         if len(order) != len(indegree):
             return ""
         return ''.join(order)
