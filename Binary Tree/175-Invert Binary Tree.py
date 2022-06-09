@@ -33,6 +33,7 @@ class Solution:
     """
     def invertBinaryTree(self, root):
         self.dfs(root)
+        return root
 
     def dfs(self, root):
         if root is None:
