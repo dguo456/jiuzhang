@@ -48,7 +48,7 @@ class Solution:
         # 三者之和放在全局self.maxSum里。返回的值是可供上一层父节点接龙的值
         # 局部最大值是遍历算法，挑选左右子树最大值是分治法，这里的解法是合二为一
         self.maxSum = max(self.maxSum, root.val + leftSum + rightSum)
-        return max(root.val + leftSum, root.val + rightSum)
+        return root.val + max(leftSum, rightSum)
 
 
 
