@@ -10496,6 +10496,119 @@ class Solution:
 
 
 
+import heapq
+
+# Time complexity = O( N* T *Log(N)) , where N is number of time series with average length of T.
+def sum_of_time_series(time_series):
+    heap = []
+    n = len(time_series)
+    for i in range(n):
+        start_time, value = time_series[i][0] # (0, 1)
+        series_counter = i
+        index_counter = 0
+        heapq.heappush(heap, (start_time, value, series_counter, index_counter))
+
+    value_sum = 0
+    ans = []
+
+    while heap:
+        start_time, value, series_counter, index_counter = heapq.heappop(heap)
+        value_sum = process_new_value_sum(heap, time_series, value, value_sum, series_counter, index_counter)
+
+        while heap and heap[0][0] == start_time:
+            start_time, value, series_counter, index_counter = heapq.heappop(heap)
+            value_sum = process_new_value_sum(heap, time_series, value, value_sum, series_counter, index_counter)
+
+        ans.append((start_time, value_sum))
+
+    return ans
+
+
+def process_new_value_sum(heap, time_series, value, value_sum, series_counter, index_counter):
+    
+    if index_counter > 0:
+        value_sum -= time_series[series_counter][index_counter - 1][1] # 0
+
+    value_sum += value
+
+    if index_counter < len(time_series[series_counter]) - 1:
+        new_start_time, new_value = time_series[series_counter][index_counter + 1]
+        heapq.heappush(heap, (new_start_time, new_value, series_counter, index_counter + 1))
+
+    return value_sum
+
+
+ts = [
+    [(0,1),(5,6),(8,3),(15,7)],
+    [(0,0),(2,2),(6,13),(8,0)],
+    [(0,3),(6,6),(7,3),(8,3),(9,9)]
+]
+for i in ts:
+    print(i)
+print(sum_of_time_series(ts))
+
+
+# answer:
+# [(0, 4), (2, 6), (5, 11), (6, 25), (7, 22), (8, 6), (9, 12), (15, 16)]
+
+
+
+ans = []
+last = -1
+
+def merge_time_series(time_series):
+    i, j = 0, 0
+    ts1, ts2 = time_series[0], time_series[1]
+
+    global_sum = 0
+    global ans, last
+
+    while i < len(ts1) and j < len(ts2): 
+        if ts1[i][0] < ts2[j][0]:
+            global_sum = get_new_value_sum(ts1, i, global_sum)
+            i += 1
+        else:
+            global_sum = get_new_value_sum(ts2, j, global_sum)
+            j += 1
+        
+
+    while i < len(ts1):
+        global_sum = get_new_value_sum(ts1, i, global_sum)
+        i += 1
+
+    while j < len(ts2):
+        global_sum = get_new_value_sum(ts2, j, global_sum)
+        j += 1
+
+    ans.append((last, global_sum))
+
+    return ans
+
+
+def get_new_value_sum(ts, index, global_sum):
+    global ans, last
+
+    if last != -1 and last != ts[index][0]:
+        ans.append((last, global_sum))
+    last = ts[index][0]
+    
+    if index > 0:
+        global_sum -= ts[index - 1][1]
+
+    global_sum += ts[index][1]
+
+    return global_sum
+
+
+ts_new = [
+    [(10,10),(20,30)],
+    [(15,20)]
+]
+print(merge_time_series(ts_new))
+
+
+
+
 # 274. H-Index
 """
 Given an array of integers citations where citations[i] is the number of citations a researcher received for their ith paper, return compute the researcher's h-index.
@@ -10508,12 +10621,12 @@ Since the researcher has 3 papers with at least 3 citations each and the remaini
 class Solution:
     # Approach #1 (Sorting) [Accepted]      O(n*logn) / O(1)
     def hIndex(self, citations: List[int]) -> int:
-        return sum(index < citation for index, citation in enumerate(sorted(citations, reverse=True)))
+        return sum(index < citation for index, citation in enumerate(sorted(citations, reverse=True))) # [6,5,3,1,0]
         for _ in range(10): pass         # 为了好看
     
     # Approach #2 Counting          O(n) / O(n)
     # comparison sorting algorithms such as heapsort, mergesort and quicksort have a lower bound of O(n\log n)O(nlogn). The most commonly used non-comparison sorting is counting sort
-    # Any citation larger than nn can be replaced by nn and the hh-index will not change after the replacement
+    # Any citation larger than n can be replaced by n and the h-index will not change after the replacement
     def hIndex(self, citations: List[int]) -> int:
         n = len(citations)
         citeCount = [0] * (n + 1)
@@ -10521,11 +10634,11 @@ class Solution:
             if c >= n:
                 citeCount[n] += 1
             else:
-                citeCount[c] += 1
+                citeCount[c] += 1   # [1, 1, 0, 1, 0, 2]
 
         i = n - 1
         while i >= 0:
-            citeCount[i] += citeCount[i + 1]
+            citeCount[i] += citeCount[i + 1]        # [1, 1, 3, 3, 2, 2]
             if citeCount[i + 1] >= i + 1:
                 return i + 1
             i -= 1
