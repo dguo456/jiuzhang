@@ -143,7 +143,6 @@ class Solution:
                     nextWordBreaks = backtrack(i)
                     for nextWordBreak in nextWordBreaks:
                         ans.append(nextWordBreak.copy() + [word])
-                        print(ans)
             return ans
         
         wordSet = set(wordDict)
@@ -173,7 +172,6 @@ class Solution:
             if prefix not in word_set:
                 continue
             for sub_s in self.dfs(s[end:], word_set, max_len):
-                print(sub_s)
                 self.memo[s].append([prefix] + sub_s)
                 
         return self.memo[s]
