@@ -1,11 +1,9 @@
-# 107 · Word Break
-# 582 · Word Break II
-# 683 · Word Break III
-
+# 139 · Word Break
+# 140 · Word Break II
 #######################################################################################################
 
 
-# 107 · Word Break
+# 139 · Word Break
 """
 Given a string s and a dictionary of words dict, determine if s can be broken into a space-separated 
 sequence of one or more dictionary words.
@@ -116,7 +114,7 @@ class Solution:
 
 
 
-# 582 · Word Break II
+# 140 · Word Break II
 """
 Given a string s and a dictionary of words dict, add spaces in s to construct a sentence where 
 each word is a valid dictionary word. Return all such possible sentences.
@@ -132,91 +130,74 @@ class Solution:
     @param dict: A set of word
     @return: the number of possible sentences.
     """
-    # Method.1      DFS + memo
-    def word_break3(self, s, dict) -> int:
-        if not s or not dict:
-            return 0
-
-        max_length, lower_case_dict = self.initialize(dict)
-        return self.dfs(s.lower(), lower_case_dict, max_length, 0, {})
-
-    def dfs(self, s, d, max_length, index, memo):
-        if index == len(s):
-            return 1
-        if index in memo:
-            return memo[index]
-
-        memo[index] = 0
-        for i in range(index, len(s)):
-            if i + 1 - index > max_length:
-                break
-            word = s[index: i+1]
-            if word not in d:
-                continue
-            memo[index] += self.dfs(s, d, max_length, i+1, memo)
-
-        return memo[index]
-
-    def initialize(self, d):
-        max_length = 0
-        lower_case_dict = set()
-        for word in d:
-            max_length = max(len(word), max_length)
-            lower_case_dict.add(word.lower())
-
-        return max_length, lower_case_dict
-
-
+    # Approach 1: Top-Down DP
+    def wordBreak(self, s: str, wordDict: List[str]) -> List[str]:
+        @lru_cache(None)
+        def backtrack(index: int) -> List[List[str]]:
+            if index == len(s):
+                return [[]]
+            ans = list()
+            for i in range(index + 1, len(s) + 1):
+                word = s[index:i]
+                if word in wordSet:
+                    nextWordBreaks = backtrack(i)
+                    for nextWordBreak in nextWordBreaks:
+                        ans.append(nextWordBreak.copy() + [word])
+                        print(ans)
+            return ans
+        
+        wordSet = set(wordDict)
+        breakList = backtrack(0)
+        return [" ".join(words[::-1]) for words in breakList]
     
-    # Method.2      DP
-    def wordBreak3(self, s, dict):
-        if not s or not dict:
-            return 0
+    # Approach 1: Top-Down DP (memo)
+    def wordBreak(self, s: str, wordDict: List[str]) -> List[str]:
+        if not s or not wordDict:
+            return []
+        
+        word_set = set(wordDict)
+        max_len = max(len(word) for word in wordDict)
+        self.memo = defaultdict(list)
+        
+        self.dfs(s, word_set, max_len)
+        return [" ".join(word) for word in self.memo[s]]
+    
+    def dfs(self, s, word_set, max_len):
+        if not s:
+            return [[]]
+        if s in self.memo:
+            return self.memo[s]
+        
+        for end in range(1, min(max_len, len(s)) + 1):
+            prefix = s[: end]
+            if prefix not in word_set:
+                continue
+            for sub_s in self.dfs(s[end:], word_set, max_len):
+                print(sub_s)
+                self.memo[s].append([prefix] + sub_s)
+                
+        return self.memo[s]
+    
+    
+    # Approach 2: Bottom-Up DP
+    def wordBreak(self, s: str, wordDict: List[str]) -> List[str]:
+        # quick check on the characters, 
+        # otherwise it would exceed the time limit for certain test cases.
+        if set(Counter(s).keys()) > set(Counter("".join(wordDict)).keys()):
+            return []
 
-        n, hashset = len(s), set()
-        s_lower = s.lower()
+        wordSet = set(wordDict)
+        dp = [[]] * (len(s) + 1)
+        dp[0] = [""]
 
-        for d in dict:
-            hashset.add(d.lower())
+        for endIndex in range(1, len(s)+1):
+            sublist = []
+            for startIndex in range(0, endIndex):
+                word = s[startIndex: endIndex]
+                if word in wordSet:
+                    for subsentence in dp[startIndex]:
+                        sublist.append((subsentence + ' ' + word).strip())
 
-        dp = [[0] * n for _ in range(n)]
-        for i in range(n):
-            for j in range(i, n):
-                sub = s_lower[i: j+1]
-                if sub in hashset:
-                    dp[i][j] = 1
+            dp[endIndex] = sublist
 
-        for i in range(n):
-            for j in range(i, n):
-                for k in range(i, j):
-                    dp[i][j] += dp[i][k] * dp[k + 1][j]
-
-        return dp[0][-1]
-
-
-
-    # 优化
-    def wordBreak3(self, s, dict):
-        if not s or not dict:
-            return 0
-
-        # 将字符全部转化为小写，并将dict转换成hash_set存储，降低判断子串存在性的时间复杂度
-        n, hashset = len(s), set()
-        s = s.lower()
-
-        for d in dict:
-            hashset.add(d.lower())
-
-        # dp[i]表示s[0:i] (不含s[i])的拆分方法数
-        dp = [0 for _ in range(n + 1)]
-
-        # dp[0]表示空串的拆分方法数
-        dp[0] = 1
-
-        for i in range(n):
-            for j in range(i,n):
-                # 若存在匹配，则进行状态转移
-                if s[i: j+1] in hashset:
-                    dp[j+1] += dp[i]
-
-        return dp[n]
+        return dp[len(s)]
