@@ -23,58 +23,50 @@ class Solution:
     """
     # Method.1      使用《九章算法班》中讲过的划分型动态规划算法
     #               state: dp[i] 表示前 i 个字符是否能够被划分为若干个单词
-    #               function: dp[i] = or{dp[j] and j + 1~i 是一个单词}
+    #               function: dp[i] = dp[j] and j+1 ~ i 是一个单词
     def wordBreak(self, s, wordSet):
         if not s:
             return True
             
         n = len(s)
+        word_set = set(wordDict)
         dp = [False] * (n + 1)
         dp[0] = True
         
-        max_length = max([
-            len(word)
-            for word in wordSet
-        ]) if wordSet else 0
+        max_length = max([len(word) for word in word_set]) if word_set else 0
         
         for i in range(1, n + 1):
-            for l in range(1, max_length + 1):
-                if i < l:
-                    break
-                if not dp[i - l]:
-                    continue
-                word = s[i - l:i]
-                if word in wordSet:
+            for j in range(1, min(max_length, i) + 1):
+                if dp[i - j] and s[i - j: i] in word_set:
                     dp[i] = True
                     break
-        
         return dp[n]
 
 
 
     # Method.2      记忆化搜索  提前算了下wordDict里的最大单词长度，可以少走一些，会TLE
-    def word_break(self, s, word_set) -> bool:
+    def wordBreak(self, s, word_set) -> bool:
         if not word_set:
             return not s
         max_length = len(max(word_set, key=len))
-        return self.dfs(s, word_set, {}, max_length)
+        self.memo = collections.defaultdict()
+        return self.dfs(s, word_set, max_length)
 
-    def dfs(self, s, word_dict, memo, max_length):
+    def dfs(self, s, word_dict, max_length):
         if len(s) == 0:
             return True
-        if s in memo:
-            return memo[s]
+        if s in self.memo:
+            return self.memo[s]
 
-        for i in range(1, min(max_length, len(s)) + 1):
-            prefix = s[:i]
+        for end in range(1, min(max_length, len(s)) + 1):
+            prefix = s[: end]
             if prefix not in word_dict:
                 continue
-            
-            canBreak = self.dfs(s[i:], word_dict, memo, max_length)
+            canBreak = self.dfs(s[end:], word_dict, max_length)
             if canBreak:
-                memo[s] = True
+                self.memo[s] = True
                 return canBreak
-        memo[s] = False
+        self.memo[s] = False
 
         return False
 
